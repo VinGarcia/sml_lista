@@ -6,7 +6,7 @@ typedef struct tLista{
   struct tLista* prox;
 } tLista;
 
-// Constroi Cabeça, ou constrói um item da lista.
+// Build a node of the list.
 tLista* cLista(tAtrb atrb)
 {
   tLista* l = (tLista*)malloc(sizeof(tLista));
@@ -17,79 +17,87 @@ tLista* cLista(tAtrb atrb)
   return l;
 }
 
-tLista* tl(tLista* l)
+tLista* tail(tLista* l)
 {
   return (l?l->prox:NULL);
 }
 
-tAtrb hd(tLista* l)
+tAtrb head(tLista* l)
 {
   return (l?l->atrb:tAtrbInval);
 }
 
-// retorna tl(l) removendo o ponteiro de l->prox.
-tLista* cuttl(tLista* l)
+// Return tail(l) and make l->prox = NULL.
+tLista* cuttail(tLista* l)
 {
-  tLista* aux = tl(l);
+  tLista* aux = tail(l);
   
-  // Se l!=NULL:
+  // If l!=NULL:
   if(l) l->prox = NULL;
   
   return aux;
 }
 
-// retorna hd(l) liberando o espaço de memoria da celula cabeça.
-tAtrb rmhd(tLista* l)
+// Returns head(l) and free the header cell memory space.
+tAtrb rmhead(tLista* l)
 {
-  tAtrb aux = hd(l);
+  tAtrb aux = head(l);
   
-  // Se l!=NULL;
+  // If l!=NULL;
   if(l) free(l);
   
   return aux;
 }
 
-// Concatena duas listas.
-// Atenção não use o cat sem o cuttl em uma operação de inserção.
-// Isso poderá gerar uma lista circular e futuramente um loop infinito.
-int cat(tLista* hd, tLista* l)
+// Concatenate two lists into one -- Complexity O(list2.length).
+// Beware this function may create a circular list thus: infinit loop.
+// To insert a list inside another list do:
+//   aux = cuttail(list1);
+//   link(list1,list2);
+//   cat(list2,aux);
+int cat(tLista* head, tLista* tl)
 {
-  // find the last item from hd:
-  while(tl(hd)) hd=tl(hd);
+  // find the last item from head:
+  while(tail(head)) head=tail(head);
   
-  // Concatenate the two lists if hd!=NULL:
-  if(hd) hd->prox = l;
+  // Concatenate the two lists if head!=NULL:
+  if(head) head->prox = tl;
   
   return 0;
 }
 
-// Liga um item cabeça de uma lista a outra lista.
-// Cuidado se houver um tl()!=NULL para hd,
-// salve esse tail antes de chamar a função link.
-int link(tLista* hd, tLista* l)
+// Link the head node with the tail node. (head->prox = tail)
+// Beware: If head is a list, the tail pointer will be overwrited.
+int link(tLista* head, tLista* tail)
 {
-  // Link the head to the list if hd!=NULL
-  if(hd) hd->prox = l;
+  // Link the head to the list if head!=NULL
+  if(head) head->prox = tail;
   
   return 0;
 }
 
-/* * * * * Operações de Pilha * * * * */
+/* * * * * Stack Operations * * * * */
 
-// Empilha um item em frente a cabeça de l.
+// This operations assumes the header cell contains no value.
+// The stack is built as the tail of the this cell.
+
+// Insert an item in front of the header cell of l.
+// (insert it on the top of the stack)
 tLista* push(tLista* l, tAtrb atrb)
 {
   tLista* aux;
-  link(aux=cLista(atrb), tl(l));
+  link(aux=cLista(atrb), tail(l));
   link(l, aux);
   return l;
 }
 
-// Desempilha um item em frente a cabeça de l, liberando o espaço de memoria.
+// Remove and free the item in front of the header cell of l.
+// Also links the header to the removed cell tail.
+// (extract the item on the top of the stack)
 tAtrb pop(tLista* l)
 {
-  tLista* aux=tl(l);
-  link(l, tl(aux));
-  return rmhd(aux);
+  tLista* aux=tail(l);
+  link(l, tail(aux));
+  return rmhead(aux);
 }
 
